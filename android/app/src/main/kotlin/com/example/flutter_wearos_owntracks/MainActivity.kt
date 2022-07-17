@@ -1,4 +1,4 @@
-package com.example.flutter_wearos_owntracks
+package com.billynate.wearosowntracks
 
 import io.flutter.embedding.android.FlutterActivity
 

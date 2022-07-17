@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.flutter_wearos_owntracks">
+    package="com.billynate.wearosowntracks">
    <application
         android:label="flutter_wearos_owntracks"
         android:name="${applicationName}"
