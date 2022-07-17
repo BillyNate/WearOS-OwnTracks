@@ -1,6 +1,9 @@
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_wearos_owntracks/content_state_provider.dart';
+import 'package:flutter_wearos_owntracks/foreground_task.dart';
+import 'package:flutter_wearos_owntracks/isolate_message.dart';
 import 'package:flutter_wearos_owntracks/screens/main_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -43,16 +46,51 @@ class _MyPageState extends State<MyPage> {
     });
   }
 
+  void _foregroundMessageReceiver(IsolateMessage message) {
+    switch (message.type) {
+      case 'Start':
+        debugPrint('Foreground task started');
+        break;
+      case 'NotificationPressed':
+        debugPrint('Notification pressed');
+        Navigator.of(context).pushNamed('/');
+        break;
+      case 'EventCount':
+        debugPrint('eventCount: ${message.data}');
+        setBatteryLevel();
+        break;
+      case 'Timestamp':
+        debugPrint('timestamp: ${message.toString()}');
+        break;
+    }
+  }
+
+  Future<void> setupForegroundTask() async {
+    ForegroundTask.foregroundMessageReceiver = _foregroundMessageReceiver;
+    ForegroundTask.managePermissions();
+    ForegroundTask.initForegroundTask();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (await FlutterForegroundTask.isRunningService) {
+        await ForegroundTask.resumeForegroundTask();
+      } else {
+        await ForegroundTask.startForegroundTask();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     setBatteryLevel();
+    setupForegroundTask();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _mainContentView,
+    return WithForegroundTask(
+      child: Scaffold(
+        body: _mainContentView,
+      ),
     );
   }
 }
