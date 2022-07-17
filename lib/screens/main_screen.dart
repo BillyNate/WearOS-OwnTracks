@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wearos_owntracks/content_state_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:wear/wear.dart';
 
 class MainContentView extends StatefulWidget {
@@ -21,6 +23,15 @@ class _MainContentViewState extends State<MainContentView> {
                 'Shape: ${shape == WearShape.round ? 'round' : 'square'}',
               ),
               child!,
+              Consumer<ContentStateProvider>(
+                  builder: (context, viewModel, child) {
+                return Column(
+                  children: [
+                    Text(
+                        'Battery is at ${viewModel.batteryLevel != 0 ? viewModel.batteryLevel : 'unknown level'}%'),
+                  ],
+                );
+              }),
             ],
           );
         },
