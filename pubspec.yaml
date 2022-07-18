@@ -38,6 +38,7 @@ dependencies:
   provider: ^6.0.3
   battery_plus: ^2.1.4
   flutter_foreground_task: ^3.7.3
+  permission_handler: ^9.2.0
 
 dev_dependencies:
   flutter_test:
