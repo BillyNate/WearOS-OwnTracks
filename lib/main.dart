@@ -5,6 +5,7 @@ import 'package:flutter_wearos_owntracks/content_state_provider.dart';
 import 'package:flutter_wearos_owntracks/foreground_task.dart';
 import 'package:flutter_wearos_owntracks/isolate_message.dart';
 import 'package:flutter_wearos_owntracks/screens/main_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -37,6 +38,12 @@ class MyPage extends StatefulWidget {
 class _MyPageState extends State<MyPage> {
   final _mainContentView = const MainContentView();
   final battery = Battery();
+
+  Future<bool> _requestPermissions() async {
+    final bool systemAlertWindowPermissionGranted =
+        await Permission.systemAlertWindow.request().isGranted;
+    return systemAlertWindowPermissionGranted;
+  }
 
   Future<void> setBatteryLevel() async {
     int batteryLevel = await battery.batteryLevel;
@@ -81,6 +88,7 @@ class _MyPageState extends State<MyPage> {
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
     setBatteryLevel();
     setupForegroundTask();
   }
