@@ -132,6 +132,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_activity_recognition:
+    dependency: "direct main"
+    description:
+      name: flutter_activity_recognition
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.3.0"
   flutter_foreground_task:
     dependency: "direct main"
     description:
