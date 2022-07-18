@@ -74,7 +74,6 @@ class _MyPageState extends State<MyPage> {
 
   Future<void> setupForegroundTask() async {
     ForegroundTask.foregroundMessageReceiver = _foregroundMessageReceiver;
-    ForegroundTask.managePermissions();
     ForegroundTask.initForegroundTask();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       if (await FlutterForegroundTask.isRunningService) {
