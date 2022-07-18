@@ -80,6 +80,9 @@ class _MyPageState extends State<MyPage> {
       case 'Timestamp':
         debugPrint('timestamp: ${message.toString()}');
         break;
+      default:
+        debugPrint('Received unknown message of type ${message.type}');
+        break;
     }
   }
 
