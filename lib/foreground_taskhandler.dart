@@ -1,15 +1,37 @@
+import 'dart:async';
 import 'dart:isolate';
+import 'package:flutter/material.dart';
+import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_wearos_owntracks/isolate_message.dart';
 
 class ForegroundTaskhandler extends TaskHandler {
   SendPort? _sendPort;
   int _eventCount = 0;
+  final _activityRecognition = FlutterActivityRecognition.instance;
+  StreamSubscription<Activity>? _activityStreamSubscription;
 
   @override
   Future<void> onStart(DateTime timestamp, SendPort? sendPort) async {
     _sendPort = sendPort;
     _sendPort?.send(IsolateMessage('Start'));
+
+    _activityStreamSubscription = _activityRecognition.activityStream
+        .handleError(onActivityRecognitionError)
+        .listen(onActivityRecognitionReceive);
+  }
+
+  void onActivityRecognitionReceive(Activity activity) {
+    debugPrint('ActivityEvent: $activity');
+    FlutterForegroundTask.saveData(
+        key: 'lastactivitytype', value: activity.type.name);
+    FlutterForegroundTask.saveData(
+        key: 'lastactivityconfidence', value: activity.confidence.name);
+    _sendPort?.send(IsolateMessage('Activity', activity));
+  }
+
+  void onActivityRecognitionError(Object error) {
+    debugPrint('ActivityError: $error');
   }
 
   @override
@@ -41,6 +63,7 @@ class ForegroundTaskhandler extends TaskHandler {
   @override
   Future<void> onDestroy(DateTime timestamp, SendPort? sendPort) async {
     // You can use the clearAllData function to clear all the stored data.
+    _activityStreamSubscription?.cancel();
     await FlutterForegroundTask.clearAllData();
   }
 }

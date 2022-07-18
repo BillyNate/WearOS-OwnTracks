@@ -1,5 +1,6 @@
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_wearos_owntracks/content_state_provider.dart';
 import 'package:flutter_wearos_owntracks/foreground_task.dart';
@@ -42,7 +43,10 @@ class _MyPageState extends State<MyPage> {
   Future<bool> _requestPermissions() async {
     final bool systemAlertWindowPermissionGranted =
         await Permission.systemAlertWindow.request().isGranted;
-    return systemAlertWindowPermissionGranted;
+    final bool activityRecognitionPermissionGranted =
+        await Permission.activityRecognition.request().isGranted;
+    return (systemAlertWindowPermissionGranted &&
+        activityRecognitionPermissionGranted);
   }
 
   Future<void> setBatteryLevel() async {
@@ -57,6 +61,13 @@ class _MyPageState extends State<MyPage> {
     switch (message.type) {
       case 'Start':
         debugPrint('Foreground task started');
+        break;
+      case 'Activity':
+        debugPrint('activity: ${message.data}');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeActivityState(message.data);
+        });
         break;
       case 'NotificationPressed':
         debugPrint('Notification pressed');
@@ -78,10 +89,27 @@ class _MyPageState extends State<MyPage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       if (await FlutterForegroundTask.isRunningService) {
         await ForegroundTask.resumeForegroundTask();
+        await restoreContent();
       } else {
         await ForegroundTask.startForegroundTask();
       }
     });
+  }
+
+  Future<void> restoreContent() async {
+    final lastactivitytype =
+        await FlutterForegroundTask.getData(key: 'lastactivitytype');
+    final lastactivityconfidence =
+        await FlutterForegroundTask.getData(key: 'lastactivityconfidence');
+
+    if (lastactivitytype != null && lastactivityconfidence != null) {
+      final activity = Activity(getActivityTypeFromString(lastactivitytype),
+          getActivityConfidenceFromString(lastactivityconfidence));
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        Provider.of<ContentStateProvider>(context, listen: false)
+            .changeActivityState(activity);
+      });
+    }
   }
 
   @override

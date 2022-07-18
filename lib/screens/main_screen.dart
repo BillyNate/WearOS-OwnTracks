@@ -29,6 +29,8 @@ class _MainContentViewState extends State<MainContentView> {
                   children: [
                     Text(
                         'Battery is at ${viewModel.batteryLevel != 0 ? viewModel.batteryLevel : 'unknown level'}%'),
+                    Text(
+                        'Activity: ${viewModel.activityState.type.name}, chance is ${viewModel.activityState.confidence.name}'),
                   ],
                 );
               }),
