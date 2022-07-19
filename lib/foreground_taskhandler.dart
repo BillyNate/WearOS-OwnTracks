@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -9,7 +10,9 @@ class ForegroundTaskhandler extends TaskHandler {
   SendPort? _sendPort;
   int _eventCount = 0;
   final _activityRecognition = FlutterActivityRecognition.instance;
+  final Connectivity _connectivity = Connectivity();
   StreamSubscription<Activity>? _activityStreamSubscription;
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   @override
   Future<void> onStart(DateTime timestamp, SendPort? sendPort) async {
@@ -19,6 +22,9 @@ class ForegroundTaskhandler extends TaskHandler {
     _activityStreamSubscription = _activityRecognition.activityStream
         .handleError(onActivityRecognitionError)
         .listen(onActivityRecognitionReceive);
+
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(onConnectivityChanged);
   }
 
   void onActivityRecognitionReceive(Activity activity) {
@@ -32,6 +38,10 @@ class ForegroundTaskhandler extends TaskHandler {
 
   void onActivityRecognitionError(Object error) {
     debugPrint('ActivityError: $error');
+  }
+
+  Future<void> onConnectivityChanged(ConnectivityResult result) async {
+    _sendPort?.send(IsolateMessage('Connectivity', result));
   }
 
   @override
@@ -64,6 +74,7 @@ class ForegroundTaskhandler extends TaskHandler {
   Future<void> onDestroy(DateTime timestamp, SendPort? sendPort) async {
     // You can use the clearAllData function to clear all the stored data.
     _activityStreamSubscription?.cancel();
+    _connectivitySubscription.cancel();
     await FlutterForegroundTask.clearAllData();
   }
 }
