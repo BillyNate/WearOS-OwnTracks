@@ -6,10 +6,12 @@ class ContentStateProvider extends ChangeNotifier {
   int _batteryLevel = 0;
   Activity _activityState = Activity.unknown;
   ConnectivityResult _connectivityState = ConnectivityResult.none;
+  bool _foregroundTaskRunningState = false;
 
   int get batteryLevel => _batteryLevel;
   Activity get activityState => _activityState;
   ConnectivityResult get connectivityState => _connectivityState;
+  bool get foregroundTaskRunningState => _foregroundTaskRunningState;
 
   void changeBatteryLevel(int batteryLevel) {
     _batteryLevel = batteryLevel;
@@ -23,6 +25,11 @@ class ContentStateProvider extends ChangeNotifier {
 
   void changeConnectivityState(ConnectivityResult connectivityState) {
     _connectivityState = connectivityState;
+    notifyListeners();
+  }
+
+  void changeForegroundTaskRunningState(bool foregroundTaskRunningState) {
+    _foregroundTaskRunningState = foregroundTaskRunningState;
     notifyListeners();
   }
 }

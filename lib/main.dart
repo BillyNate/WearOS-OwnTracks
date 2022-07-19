@@ -64,6 +64,10 @@ class _MyPageState extends State<MyPage> {
     switch (message.type) {
       case 'Start':
         debugPrint('Foreground task started');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeForegroundTaskRunningState(true);
+        });
         break;
       case 'Activity':
         debugPrint('activity: ${message.data}');
@@ -132,14 +136,18 @@ class _MyPageState extends State<MyPage> {
     final lastactivityconfidence =
         await FlutterForegroundTask.getData(key: 'lastactivityconfidence');
 
-    if (lastactivitytype != null && lastactivityconfidence != null) {
-      final activity = Activity(getActivityTypeFromString(lastactivitytype),
-          getActivityConfidenceFromString(lastactivityconfidence));
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Provider.of<ContentStateProvider>(context, listen: false)
+          .changeForegroundTaskRunningState(true);
+
+      if (lastactivitytype != null && lastactivityconfidence != null) {
+        final activity = Activity(getActivityTypeFromString(lastactivitytype),
+            getActivityConfidenceFromString(lastactivityconfidence));
+
         Provider.of<ContentStateProvider>(context, listen: false)
             .changeActivityState(activity);
-      });
-    }
+      }
+    });
   }
 
   @override

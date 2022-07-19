@@ -30,6 +30,8 @@ class _MainContentViewState extends State<MainContentView> {
                     Text(
                         'Battery is at ${viewModel.batteryLevel != 0 ? viewModel.batteryLevel : 'unknown level'}%'),
                     Text(
+                        'Foreground task is ${viewModel.foregroundTaskRunningState ? '' : 'not'} running'),
+                    Text(
                         'Activity: ${viewModel.activityState.type.name}, chance is ${viewModel.activityState.confidence.name}'),
                     Text('Connected to ${viewModel.connectivityState.name}'),
                   ],
