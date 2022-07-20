@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_wearos_owntracks/isolate_message.dart';
+import 'package:flutter_wearos_owntracks/mqtt_connection.dart';
 
 class ForegroundTaskhandler extends TaskHandler {
   SendPort? _sendPort;
   int _eventCount = 0;
   final _activityRecognition = FlutterActivityRecognition.instance;
   final Connectivity _connectivity = Connectivity();
+  final MQTTConnection _mqttConnection = MQTTConnection();
   StreamSubscription<Activity>? _activityStreamSubscription;
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
@@ -25,6 +27,11 @@ class ForegroundTaskhandler extends TaskHandler {
 
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(onConnectivityChanged);
+
+    _mqttConnection.onConnected = onMQTTConnected;
+    _mqttConnection.onDisconnected = onMQTTDisconnected;
+    _mqttConnection.init();
+    _mqttConnection.connect();
   }
 
   void onActivityRecognitionReceive(Activity activity) {
@@ -42,6 +49,16 @@ class ForegroundTaskhandler extends TaskHandler {
 
   Future<void> onConnectivityChanged(ConnectivityResult result) async {
     _sendPort?.send(IsolateMessage('Connectivity', result));
+  }
+
+  void onMQTTConnected() {
+    debugPrint('MQTT connected!');
+    _sendPort?.send(IsolateMessage('MQTTConnected', true));
+  }
+
+  void onMQTTDisconnected() {
+    debugPrint('MQTT disconnected!');
+    _sendPort?.send(IsolateMessage('MQTTConnected', false));
   }
 
   @override

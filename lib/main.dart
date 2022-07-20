@@ -83,6 +83,13 @@ class _MyPageState extends State<MyPage> {
               .changeConnectivityState(message.data);
         });
         break;
+      case 'MQTTConnected':
+        debugPrint('MQTTConnected: ${message.data}');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeMQTTConnectedState(message.data);
+        });
+        break;
       case 'NotificationPressed':
         debugPrint('Notification pressed');
         Navigator.of(context).pushNamed('/');

@@ -34,6 +34,8 @@ class _MainContentViewState extends State<MainContentView> {
                     Text(
                         'Activity: ${viewModel.activityState.type.name}, chance is ${viewModel.activityState.confidence.name}'),
                     Text('Connected to ${viewModel.connectivityState.name}'),
+                    Text(
+                        'MQTT is ${viewModel.mqttConnectedState ? 'connected to' : 'disconnected from'} server'),
                   ],
                 );
               }),
