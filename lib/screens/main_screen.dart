@@ -33,7 +33,8 @@ class _MainContentViewState extends State<MainContentView> {
                         'Foreground task is ${viewModel.foregroundTaskRunningState ? '' : 'not'} running'),
                     Text(
                         'Activity: ${viewModel.activityState.type.name}, chance is ${viewModel.activityState.confidence.name}'),
-                    Text('Connected to ${viewModel.connectivityState.name}'),
+                    Text(
+                        'Connected to ${viewModel.connectivityState.name}${viewModel.networkInfoData != null && viewModel.connectivityState.name == 'wifi' ? ' (${viewModel.networkInfoData?.wifiName})' : ''}'),
                     Text(
                         'MQTT is ${viewModel.mqttConnectedState ? 'connected to' : 'disconnected from'} server'),
                   ],

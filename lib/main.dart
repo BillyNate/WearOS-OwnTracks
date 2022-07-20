@@ -7,7 +7,9 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_wearos_owntracks/content_state_provider.dart';
 import 'package:flutter_wearos_owntracks/foreground_task.dart';
 import 'package:flutter_wearos_owntracks/isolate_message.dart';
+import 'package:flutter_wearos_owntracks/network_info_data.dart';
 import 'package:flutter_wearos_owntracks/screens/main_screen.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -42,14 +44,19 @@ class _MyPageState extends State<MyPage> {
   final _mainContentView = const MainContentView();
   final battery = Battery();
   final Connectivity _connectivity = Connectivity();
+  final NetworkInfo _networkInfo = NetworkInfo();
 
   Future<bool> _requestPermissions() async {
     final bool systemAlertWindowPermissionGranted =
         await Permission.systemAlertWindow.request().isGranted;
     final bool activityRecognitionPermissionGranted =
         await Permission.activityRecognition.request().isGranted;
+    final bool locationAlwaysPermissionGranted =
+        await Permission.locationAlways.request().isGranted;
+
     return (systemAlertWindowPermissionGranted &&
-        activityRecognitionPermissionGranted);
+        activityRecognitionPermissionGranted &&
+        locationAlwaysPermissionGranted);
   }
 
   Future<void> setBatteryLevel() async {
@@ -90,6 +97,14 @@ class _MyPageState extends State<MyPage> {
               .changeMQTTConnectedState(message.data);
         });
         break;
+      case 'NetworkInfo':
+        debugPrint(
+            'NetworkInfo ${message.data != null ? ': ${message.data?.wifiName}' : ''}');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeNetworkInfo(message.data);
+        });
+        break;
       case 'NotificationPressed':
         debugPrint('Notification pressed');
         Navigator.of(context).pushNamed('/');
@@ -122,13 +137,23 @@ class _MyPageState extends State<MyPage> {
 
   Future<bool> getConnectivity() async {
     late ConnectivityResult result;
+    late NetworkInfoData networkInfoData;
 
     try {
       result = await _connectivity.checkConnectivity();
+      if (result == ConnectivityResult.wifi) {
+        networkInfoData = NetworkInfoData(
+            wifiName: await _networkInfo.getWifiName(),
+            wifiBSSID: await _networkInfo.getWifiBSSID());
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         Provider.of<ContentStateProvider>(context, listen: false)
             .changeConnectivityState(result);
+        if (result == ConnectivityResult.wifi) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeNetworkInfo(networkInfoData);
+        }
       });
     } on PlatformException catch (error) {
       debugPrint('Couldn\'t check connectivity status $error');

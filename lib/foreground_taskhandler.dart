@@ -6,12 +6,15 @@ import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_wearos_owntracks/isolate_message.dart';
 import 'package:flutter_wearos_owntracks/mqtt_connection.dart';
+import 'package:flutter_wearos_owntracks/network_info_data.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 
 class ForegroundTaskhandler extends TaskHandler {
   SendPort? _sendPort;
   int _eventCount = 0;
   final _activityRecognition = FlutterActivityRecognition.instance;
   final Connectivity _connectivity = Connectivity();
+  final NetworkInfo _networkInfo = NetworkInfo();
   final MQTTConnection _mqttConnection = MQTTConnection();
   StreamSubscription<Activity>? _activityStreamSubscription;
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
@@ -49,6 +52,14 @@ class ForegroundTaskhandler extends TaskHandler {
 
   Future<void> onConnectivityChanged(ConnectivityResult result) async {
     _sendPort?.send(IsolateMessage('Connectivity', result));
+    if (result == ConnectivityResult.wifi) {
+      NetworkInfoData networkInfoData = NetworkInfoData(
+          wifiName: await _networkInfo.getWifiName(),
+          wifiBSSID: await _networkInfo.getWifiBSSID());
+      _sendPort?.send(IsolateMessage('NetworkInfo', networkInfoData));
+    } else {
+      _sendPort?.send(IsolateMessage('NetworkInfo', null));
+    }
   }
 
   void onMQTTConnected() {
