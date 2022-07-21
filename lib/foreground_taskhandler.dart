@@ -161,6 +161,7 @@ class ForegroundTaskhandler extends TaskHandler {
   void onMQTTConnected() {
     debugPrint('MQTT connected!');
     _sendPort?.send(IsolateMessage('MQTTConnected', true));
+    FlutterForegroundTask.saveData(key: 'mqttconnected', value: true);
     if (_lastOwnTracksMessage != null) {
       _mqttConnection.publishOwnTracksMessage(_lastOwnTracksMessage!);
       _lastOwnTracksMessage = null;
@@ -170,11 +171,13 @@ class ForegroundTaskhandler extends TaskHandler {
   void onMQTTDisconnected() {
     debugPrint('MQTT disconnected!');
     _sendPort?.send(IsolateMessage('MQTTConnected', false));
+    FlutterForegroundTask.saveData(key: 'mqttconnected', value: false);
   }
 
   void onMQTTAutoReconnected() {
     debugPrint('MQTT auto reconnected!');
     _sendPort?.send(IsolateMessage('MQTTConnected', true));
+    FlutterForegroundTask.saveData(key: 'mqttconnected', value: true);
     if (_lastOwnTracksMessage != null) {
       _mqttConnection.publishOwnTracksMessage(_lastOwnTracksMessage!);
       _lastOwnTracksMessage = null;

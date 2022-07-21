@@ -185,6 +185,9 @@ class _MyPageState extends State<MyPage> {
     final lastactivityconfidence =
         await FlutterForegroundTask.getData(key: 'lastactivityconfidence');
 
+    final mqttConnected =
+        await FlutterForegroundTask.getData(key: 'mqttconnected');
+
     final gpsTurnedOn = await FlutterForegroundTask.getData(key: 'gps');
     final gpsposition = await FlutterForegroundTask.getData(key: 'gpsposition');
 
@@ -198,6 +201,11 @@ class _MyPageState extends State<MyPage> {
 
         Provider.of<ContentStateProvider>(context, listen: false)
             .changeActivityState(activity);
+      }
+
+      if (mqttConnected != null) {
+        Provider.of<ContentStateProvider>(context, listen: false)
+            .changeMQTTConnectedState(mqttConnected);
       }
 
       if (gpsTurnedOn != null) {
