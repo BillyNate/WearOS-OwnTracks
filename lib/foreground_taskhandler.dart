@@ -111,10 +111,15 @@ class ForegroundTaskhandler extends TaskHandler {
   void onActivityRecognitionReceive(Activity activity) {
     _gpsDecider.activity = activity;
     debugPrint('ActivityEvent: $activity');
+
+    Map<String, dynamic> activityMap = {
+      'type': activity.type.name,
+      'confidence': activity.confidence.name,
+    };
     FlutterForegroundTask.saveData(
-        key: 'lastactivitytype', value: activity.type.name);
-    FlutterForegroundTask.saveData(
-        key: 'lastactivityconfidence', value: activity.confidence.name);
+      key: 'lastactivity',
+      value: json.encode(activityMap),
+    );
     _sendPort?.send(IsolateMessage('Activity', activity));
   }
 

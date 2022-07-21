@@ -180,10 +180,8 @@ class _MyPageState extends State<MyPage> {
   }
 
   Future<void> restoreContent() async {
-    final lastactivitytype =
-        await FlutterForegroundTask.getData(key: 'lastactivitytype');
-    final lastactivityconfidence =
-        await FlutterForegroundTask.getData(key: 'lastactivityconfidence');
+    String? lastactivityData =
+        await FlutterForegroundTask.getData(key: 'lastactivity');
 
     final mqttConnected =
         await FlutterForegroundTask.getData(key: 'mqttconnected');
@@ -195,9 +193,13 @@ class _MyPageState extends State<MyPage> {
       Provider.of<ContentStateProvider>(context, listen: false)
           .changeForegroundTaskRunningState(true);
 
-      if (lastactivitytype != null && lastactivityconfidence != null) {
-        final activity = Activity(getActivityTypeFromString(lastactivitytype),
-            getActivityConfidenceFromString(lastactivityconfidence));
+      if (lastactivityData != null) {
+        debugPrint('lastactivity: $lastactivityData');
+        Map<String, dynamic> lastactivity = json.decode(lastactivityData);
+        Activity activity = Activity(
+          getActivityTypeFromString(lastactivity['type']),
+          getActivityConfidenceFromString(lastactivity['confidence']),
+        );
 
         Provider.of<ContentStateProvider>(context, listen: false)
             .changeActivityState(activity);
