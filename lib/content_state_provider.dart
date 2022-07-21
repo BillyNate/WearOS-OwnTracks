@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_wearos_owntracks/network_info_data.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ContentStateProvider extends ChangeNotifier {
   int _batteryLevel = 0;
@@ -9,6 +10,8 @@ class ContentStateProvider extends ChangeNotifier {
   ConnectivityResult _connectivityState = ConnectivityResult.none;
   NetworkInfoData? _networkInfoData;
   bool _foregroundTaskRunningState = false;
+  bool _gpsListeningState = false;
+  Position? _gpsPosition;
   bool _mqttConnectedState = false;
 
   int get batteryLevel => _batteryLevel;
@@ -16,6 +19,8 @@ class ContentStateProvider extends ChangeNotifier {
   ConnectivityResult get connectivityState => _connectivityState;
   NetworkInfoData? get networkInfoData => _networkInfoData;
   bool get foregroundTaskRunningState => _foregroundTaskRunningState;
+  bool get gpsListeningState => _gpsListeningState;
+  Position? get gpsPosition => _gpsPosition;
   bool get mqttConnectedState => _mqttConnectedState;
 
   void changeBatteryLevel(int batteryLevel) {
@@ -40,6 +45,16 @@ class ContentStateProvider extends ChangeNotifier {
 
   void changeForegroundTaskRunningState(bool foregroundTaskRunningState) {
     _foregroundTaskRunningState = foregroundTaskRunningState;
+    notifyListeners();
+  }
+
+  void changeGPSListeningState(bool gpsListeningState) {
+    _gpsListeningState = gpsListeningState;
+    notifyListeners();
+  }
+
+  void changeGPSPosition(Position gpsPosition) {
+    _gpsPosition = gpsPosition;
     notifyListeners();
   }
 

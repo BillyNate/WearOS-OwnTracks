@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_wearos_owntracks/foreground_task.dart';
 import 'package:flutter_wearos_owntracks/isolate_message.dart';
 import 'package:flutter_wearos_owntracks/network_info_data.dart';
 import 'package:flutter_wearos_owntracks/screens/main_screen.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -90,6 +92,13 @@ class _MyPageState extends State<MyPage> {
               .changeConnectivityState(message.data);
         });
         break;
+      case 'GPS':
+        debugPrint('gps: ${message.data.toString()}');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeGPSListeningState(message.data);
+        });
+        break;
       case 'MQTTConnected':
         debugPrint('MQTTConnected: ${message.data}');
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -108,6 +117,14 @@ class _MyPageState extends State<MyPage> {
       case 'NotificationPressed':
         debugPrint('Notification pressed');
         Navigator.of(context).pushNamed('/');
+        break;
+      case 'Position':
+        debugPrint(
+            'GPS position: ${message.data.longitude.toString()}, ${message.data.latitude.toString()}');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Provider.of<ContentStateProvider>(context, listen: false)
+              .changeGPSPosition(message.data);
+        });
         break;
       case 'EventCount':
         debugPrint('eventCount: ${message.data}');
@@ -168,6 +185,9 @@ class _MyPageState extends State<MyPage> {
     final lastactivityconfidence =
         await FlutterForegroundTask.getData(key: 'lastactivityconfidence');
 
+    final gpsTurnedOn = await FlutterForegroundTask.getData(key: 'gps');
+    final gpsposition = await FlutterForegroundTask.getData(key: 'gpsposition');
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Provider.of<ContentStateProvider>(context, listen: false)
           .changeForegroundTaskRunningState(true);
@@ -178,6 +198,17 @@ class _MyPageState extends State<MyPage> {
 
         Provider.of<ContentStateProvider>(context, listen: false)
             .changeActivityState(activity);
+      }
+
+      if (gpsTurnedOn != null) {
+        Provider.of<ContentStateProvider>(context, listen: false)
+            .changeGPSListeningState(gpsTurnedOn);
+      }
+
+      if (gpsposition != null) {
+        debugPrint('gpsposition: $gpsposition');
+        Provider.of<ContentStateProvider>(context, listen: false)
+            .changeGPSPosition(Position.fromMap(json.decode(gpsposition)));
       }
     });
   }

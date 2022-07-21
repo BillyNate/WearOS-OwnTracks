@@ -37,6 +37,14 @@ class _MainContentViewState extends State<MainContentView> {
                         'Connected to ${viewModel.connectivityState.name}${viewModel.networkInfoData != null && viewModel.connectivityState.name == 'wifi' ? ' (${viewModel.networkInfoData?.wifiName})' : ''}'),
                     Text(
                         'MQTT is ${viewModel.mqttConnectedState ? 'connected to' : 'disconnected from'} server'),
+                    Text(
+                        'GPS is ${viewModel.gpsListeningState ? 'on' : 'off'}'),
+                    Text(viewModel.gpsPosition != null
+                        ? '(${viewModel.gpsPosition?.latitude},'
+                        : ''),
+                    Text(viewModel.gpsPosition != null
+                        ? '${viewModel.gpsPosition?.longitude})'
+                        : ''),
                   ],
                 );
               }),

@@ -47,4 +47,5 @@ app.*.map.json
 /android/app/release
 
 # Project related
+/lib/known_locations.dart
 /lib/mqtt_credentials.dart
