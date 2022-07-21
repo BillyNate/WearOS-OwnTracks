@@ -29,7 +29,7 @@ class ForegroundTask {
         ),
       ),
       foregroundTaskOptions: const ForegroundTaskOptions(
-        interval: 5000,
+        interval: 30 * 1000,
         autoRunOnBoot: true,
         allowWifiLock: true,
       ),
