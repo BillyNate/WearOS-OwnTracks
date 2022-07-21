@@ -183,11 +183,12 @@ class _MyPageState extends State<MyPage> {
     String? lastactivityData =
         await FlutterForegroundTask.getData(key: 'lastactivity');
 
-    final mqttConnected =
+    bool? mqttConnected =
         await FlutterForegroundTask.getData(key: 'mqttconnected');
 
-    final gpsTurnedOn = await FlutterForegroundTask.getData(key: 'gps');
-    final gpsposition = await FlutterForegroundTask.getData(key: 'gpsposition');
+    bool? gpsTurnedOn = await FlutterForegroundTask.getData(key: 'gps');
+    String? gpsposition =
+        await FlutterForegroundTask.getData(key: 'gpsposition');
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Provider.of<ContentStateProvider>(context, listen: false)
