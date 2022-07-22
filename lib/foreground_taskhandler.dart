@@ -13,6 +13,7 @@ import 'package:flutter_wearos_owntracks/network_info_data.dart';
 import 'package:flutter_wearos_owntracks/owntracks_message.dart';
 import 'package:flutter_wearos_owntracks/gps_decider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
@@ -21,6 +22,7 @@ class ForegroundTaskhandler extends TaskHandler {
   int _eventCount = 0;
   int _batteryLevel = 100;
   OwnTracksMessage? _lastOwnTracksMessage;
+  Position? _lastPosition;
   final _battery = Battery();
   final _activityRecognition = FlutterActivityRecognition.instance;
   final Connectivity _connectivity = Connectivity();
@@ -147,6 +149,7 @@ class ForegroundTaskhandler extends TaskHandler {
       debugPrint(
           'Location: ${position.latitude.toString()}, ${position.longitude.toString()}');
 
+      _lastPosition = position;
       _sendPort?.send(IsolateMessage('Position', position));
       FlutterForegroundTask.saveData(
           key: 'gpsposition', value: json.encode(position.toJson()));
@@ -191,9 +194,27 @@ class ForegroundTaskhandler extends TaskHandler {
 
   @override
   Future<void> onEvent(DateTime timestamp, SendPort? sendPort) async {
+    final DateFormat formatter = DateFormat('dd-MM-yy H:mm');
+
+    List<String?> notificationText = [];
+    if (_gpsDecider.activity != null) {
+      notificationText.add(_gpsDecider.activity?.type.name);
+    }
+    if (_gpsDecider.connectivityResult != null) {
+      notificationText.add(_gpsDecider.connectivityResult?.name);
+    }
+    notificationText
+        .add('MQTT ${_mqttConnection.connectionStatus!.state.name}');
+    if (_positionStream != null && _lastPosition != null) {
+      notificationText.add(
+          '(${_lastPosition?.latitude.toString()}, ${_lastPosition?.longitude.toString()})');
+    }
+
     FlutterForegroundTask.updateService(
-        notificationTitle: 'ForegroundTaskhandler',
-        notificationText: 'eventCount: $_eventCount');
+      notificationTitle: 'Ongoing...',
+      notificationText:
+          '${formatter.format(timestamp)}: ${notificationText.join(', ')}',
+    );
 
     // Send data to the main isolate.
     sendPort?.send(IsolateMessage('EventCount', _eventCount));
